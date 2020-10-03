@@ -13,6 +13,8 @@ mixed_results = twitter_bot.search(q="\"not with a bang\"", count=100, lang="en"
 #Tweet counter to make sure that the bot only retweets one tweet every time the script runs
 tweet_counter=0
 
+#Look up previously tweeted IDs
+previously_quoted_tweet_ids = [tweet['quoted_status_id'] for tweet in twitter_bot.get_home_timeline()]
 
 #print(search_results)
 #Function to make sure tweet mentions "James Baldwin"
@@ -42,44 +44,46 @@ for tweet in popular_results["statuses"]:
         tweet_text = tweet['full_text']
         user = tweet['user']['screen_name']
         id = tweet['id']
+    
+    if id not in previously_quoted_tweet_ids:
 
-    if mentions_bang(tweet) == True:
-        try:
-            #Check that tweets has more than 100 RTs
-            if  rt_count > 100 and tweet_counter ==0:
-                #Retweet the tweet!
-                but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
-                but_with_a = but_with_a.replace('\n', '').lower()
-                but_with_a = re.sub(r'http\S+', '', but_with_a)
-                but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
-                but_with_a = re.sub(r'^ ', '', but_with_a )
+        if mentions_bang(tweet) == True:
+            try:
+                #Check that tweets has more than 100 RTs
+                if  rt_count > 100 and tweet_counter ==0:
+                    #Retweet the tweet!
+                    but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
+                    but_with_a = but_with_a.replace('\n', '').lower()
+                    but_with_a = re.sub(r'http\S+', '', but_with_a)
+                    but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
+                    but_with_a = re.sub(r'^ ', '', but_with_a )
 
-                tweet_url = f'https://twitter.com/{user}/status/{id}'
-                new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
-                print(new_tweet)
-                twitter_bot.update_status(status=new_tweet)
-                tweet_counter +=1
-                print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
-            #Check that Twitter account has more than 1000 followers
-            elif followers_count > 10000 and tweet_counter ==0:
-                #Retweet the tweet!
-                but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
-                but_with_a = but_with_a.replace('\n', '').lower() 
-                but_with_a = re.sub(r'http\S+', '', but_with_a)  
-                but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
-                but_with_a = re.sub(r'^ ', '', but_with_a )
+                    tweet_url = f'https://twitter.com/{user}/status/{id}'
+                    new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
+                    print(new_tweet)
+                    twitter_bot.update_status(status=new_tweet)
+                    tweet_counter +=1
+                    print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                #Check that Twitter account has more than 1000 followers
+                elif followers_count > 10000 and tweet_counter ==0:
+                    #Retweet the tweet!
+                    but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
+                    but_with_a = but_with_a.replace('\n', '').lower() 
+                    but_with_a = re.sub(r'http\S+', '', but_with_a)  
+                    but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
+                    but_with_a = re.sub(r'^ ', '', but_with_a )
 
-                tweet_url = f'https://twitter.com/{user}/status/{id}'
-                new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
-                
-                twitter_bot.update_status(status=new_tweet)
-                print(new_tweet)
-                tweet_counter +=1
-                print(f"✨Met follower threshold✨ Succesfully retweeted {tweet_text}!")
-        except TwythonError as e:
-            print(e)
-            print(f"ERROR! \n Tweet: {new_tweet} {tweet_text} \n Followers: {followers_count} \n URL: {tweet_url} \n RT:{rt_count}")
-            continue
+                    tweet_url = f'https://twitter.com/{user}/status/{id}'
+                    new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
+                    
+                    twitter_bot.update_status(status=new_tweet)
+                    print(new_tweet)
+                    tweet_counter +=1
+                    print(f"✨Met follower threshold✨ Succesfully retweeted {tweet_text}!")
+            except TwythonError as e:
+                print(e)
+                print(f"ERROR! \n Tweet: {new_tweet} {tweet_text} \n Followers: {followers_count} \n URL: {tweet_url} \n RT:{rt_count}")
+                continue
 
 for tweet in mixed_results["statuses"]:
     
@@ -95,41 +99,42 @@ for tweet in mixed_results["statuses"]:
         tweet_text = tweet['full_text']
         user = tweet['user']['screen_name']
         id = tweet['id']
+    
+    if id not in previously_quoted_tweet_ids:
+        if mentions_bang(tweet) == True:
+            try:
+                #Check that tweets has more than 100 RTs
+                if  rt_count > 100 and tweet_counter ==0:
+                    #Retweet the tweet!
+                    but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
+                    but_with_a = but_with_a.replace('\n', '').lower()
+                    but_with_a = re.sub(r'http\S+', '', but_with_a)
+                    but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
+                    but_with_a = re.sub(r'^ ', '', but_with_a )
 
-    if mentions_bang(tweet) == True:
-        try:
-            #Check that tweets has more than 100 RTs
-            if  rt_count > 100 and tweet_counter ==0:
-                #Retweet the tweet!
-                but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
-                but_with_a = but_with_a.replace('\n', '').lower()
-                but_with_a = re.sub(r'http\S+', '', but_with_a)
-                but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
-                but_with_a = re.sub(r'^ ', '', but_with_a )
+                    tweet_url = f'https://twitter.com/{user}/status/{id}'
+                    new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
+                    print(new_tweet)
+                    twitter_bot.update_status(status=new_tweet)
+                    tweet_counter +=1
+                    print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                #Check that Twitter account has more than 1000 followers
+                elif followers_count > 10000 and tweet_counter ==0:
+                    #Retweet the tweet!
+                    but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
+                    but_with_a = but_with_a.replace('\n', '').lower() 
+                    but_with_a = re.sub(r'http\S+', '', but_with_a)  
+                    but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
+                    but_with_a = re.sub(r'^ ', '', but_with_a )
 
-                tweet_url = f'https://twitter.com/{user}/status/{id}'
-                new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
-                print(new_tweet)
-                twitter_bot.update_status(status=new_tweet)
-                tweet_counter +=1
-                print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
-            #Check that Twitter account has more than 1000 followers
-            elif followers_count > 10000 and tweet_counter ==0:
-                #Retweet the tweet!
-                but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
-                but_with_a = but_with_a.replace('\n', '').lower() 
-                but_with_a = re.sub(r'http\S+', '', but_with_a)  
-                but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
-                but_with_a = re.sub(r'^ ', '', but_with_a )
-
-                tweet_url = f'https://twitter.com/{user}/status/{id}'
-                new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
-                
-                twitter_bot.update_status(status=new_tweet)
-                print(new_tweet)
-                tweet_counter +=1
-                print(f"✨Met follower threshold✨ Succesfully retweeted {tweet_text}!")
-        except TwythonError as e:
-            print(e)
-            print(f"ERROR! \n Tweet: {new_tweet} {tweet_text} \n Followers: {followers_count} \n URL: {tweet_url} \n RT:{rt_count}")
-            continue
+                    tweet_url = f'https://twitter.com/{user}/status/{id}'
+                    new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
+                    
+                    twitter_bot.update_status(status=new_tweet)
+                    print(new_tweet)
+                    tweet_counter +=1
+                    print(f"✨Met follower threshold✨ Succesfully retweeted {tweet_text}!")
+            except TwythonError as e:
+                print(e)
+                print(f"ERROR! \n Tweet: {new_tweet} {tweet_text} \n Followers: {followers_count} \n URL: {tweet_url} \n RT:{rt_count}")
+                continue
