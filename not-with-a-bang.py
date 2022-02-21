@@ -15,7 +15,12 @@ tweet_counter=0
 
 #Look up previously tweeted IDs
 #previously_quoted_tweet_ids = [tweet['quoted_status_id'] for tweet in twitter_bot.get_home_timeline()]
+#Look up previously tweeted IDs
 previously_quoted_tweet_ids = []
+for tweet in twitter_bot.get_home_timeline():
+    if 'quoted_status_id' in tweet:
+        previously_quoted_tweet_ids.append(tweet['quoted_status_id'])
+        #print(tweet['quoted_status_id'])
 
 #print(search_results)
 #Function to make sure tweet mentions "James Baldwin"

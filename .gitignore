@@ -3,3 +3,4 @@ test.py
 __pycache__
 *.ipynb
 .ipynb_checkpoints
+not-with-a-bang2.py
