@@ -14,24 +14,27 @@ mixed_results = twitter_bot.search(q="\"not with a bang\"", count=100, lang="en"
 tweet_counter=0
 
 #Look up previously tweeted IDs
-previously_quoted_tweet_ids = [tweet['quoted_status_id'] for tweet in twitter_bot.get_home_timeline()]
+#previously_quoted_tweet_ids = [tweet['quoted_status_id'] for tweet in twitter_bot.get_home_timeline()]
+previously_quoted_tweet_ids = []
 
 #print(search_results)
 #Function to make sure tweet mentions "James Baldwin"
 def mentions_bang(status):
     # Remove capital letters and excessive whitespace/linebreaks
-    test_text = ' '.join(status['full_text'].lower().split()) 
+    test_text = ' '.join(status['full_text'].lower().split())
     test_text = re.sub(r'[^\w\s]','',test_text)
     #usernames = []
     #if status['user']['screen_name'] not in usernames and all(u not in status['text'] for u in usernames):
-    if 'not with a bang but' in test_text and 'whimper' not in test_text:
+    #if 'not with a bang but' in test_text and 'whimper' not in test_text:
+    #
+    if 'not with a bang but' in test_text in test_text:
         return True
     else:
         return False
 
 #Loop through search results
 for tweet in popular_results["statuses"]:
-    
+
     if 'retweeted_status' in tweet.keys():
         followers_count = tweet['retweeted_status']['user']['followers_count']
         rt_count = tweet['retweeted_status']['retweet_count']
@@ -44,7 +47,7 @@ for tweet in popular_results["statuses"]:
         tweet_text = tweet['full_text']
         user = tweet['user']['screen_name']
         id = tweet['id']
-    
+
     if id not in previously_quoted_tweet_ids:
 
         if mentions_bang(tweet) == True:
@@ -59,7 +62,7 @@ for tweet in popular_results["statuses"]:
                     but_with_a = re.sub(r'^ ', '', but_with_a )
 
                     tweet_url = f'https://twitter.com/{user}/status/{id}'
-                    new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
+                    new_tweet= f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n\n{tweet_url}'
                     print(new_tweet)
                     twitter_bot.update_status(status=new_tweet)
                     tweet_counter +=1
@@ -68,14 +71,14 @@ for tweet in popular_results["statuses"]:
                 elif followers_count > 10000 and tweet_counter ==0:
                     #Retweet the tweet!
                     but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
-                    but_with_a = but_with_a.replace('\n', '').lower() 
-                    but_with_a = re.sub(r'http\S+', '', but_with_a)  
+                    but_with_a = but_with_a.replace('\n', '').lower()
+                    but_with_a = re.sub(r'http\S+', '', but_with_a)
                     but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
                     but_with_a = re.sub(r'^ ', '', but_with_a )
 
                     tweet_url = f'https://twitter.com/{user}/status/{id}'
-                    new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
-                    
+                    new_tweet= f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n{tweet_url}'
+
                     twitter_bot.update_status(status=new_tweet)
                     print(new_tweet)
                     tweet_counter +=1
@@ -86,7 +89,7 @@ for tweet in popular_results["statuses"]:
                 continue
 
 for tweet in mixed_results["statuses"]:
-    
+
     if 'retweeted_status' in tweet.keys():
         followers_count = tweet['retweeted_status']['user']['followers_count']
         rt_count = tweet['retweeted_status']['retweet_count']
@@ -99,7 +102,7 @@ for tweet in mixed_results["statuses"]:
         tweet_text = tweet['full_text']
         user = tweet['user']['screen_name']
         id = tweet['id']
-    
+
     if id not in previously_quoted_tweet_ids:
         if mentions_bang(tweet) == True:
             try:
@@ -113,7 +116,7 @@ for tweet in mixed_results["statuses"]:
                     but_with_a = re.sub(r'^ ', '', but_with_a )
 
                     tweet_url = f'https://twitter.com/{user}/status/{id}'
-                    new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
+                    new_tweet= f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n{tweet_url}'
                     print(new_tweet)
                     twitter_bot.update_status(status=new_tweet)
                     tweet_counter +=1
@@ -122,14 +125,14 @@ for tweet in mixed_results["statuses"]:
                 elif followers_count > 10000 and tweet_counter ==0:
                     #Retweet the tweet!
                     but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
-                    but_with_a = but_with_a.replace('\n', '').lower() 
-                    but_with_a = re.sub(r'http\S+', '', but_with_a)  
+                    but_with_a = but_with_a.replace('\n', '').lower()
+                    but_with_a = re.sub(r'http\S+', '', but_with_a)
                     but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
                     but_with_a = re.sub(r'^ ', '', but_with_a )
 
                     tweet_url = f'https://twitter.com/{user}/status/{id}'
-                    new_tweet= f'💥💥💥\nThis is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n💥💥💥\n\n{tweet_url}'
-                    
+                    new_tweet= f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}\n{tweet_url}'
+
                     twitter_bot.update_status(status=new_tweet)
                     print(new_tweet)
                     tweet_counter +=1
