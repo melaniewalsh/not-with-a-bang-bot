@@ -4,3 +4,4 @@ __pycache__
 *.ipynb
 .ipynb_checkpoints
 not-with-a-bang2.py
+scraps.py
