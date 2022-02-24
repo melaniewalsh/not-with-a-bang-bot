@@ -130,8 +130,11 @@ for page in search_results:
                                 #Check that tweets has more than 100 RTs
                                     if  rt_count > 100 or followers_count > 5000 or verified == True:
                                         #Retweet the tweet!
-                                        but_with_a = format_bang_followup(tweet_text)
-                                        if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)).group() != None:
+                                        if (re.search('(?<=not with a bang).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)) != None:
+                                            but_with_a = format_bang_followup(tweet_text)
+                                        else:
+                                            but_with_a = "but a whimper"
+                                        if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)) != None:
                                             the_blank = format_the_blank_followup(tweet_text)
                                         else:
                                             the_blank = "the world ends"
@@ -160,8 +163,10 @@ for page in search_results:
                                 #Check that tweets has more than 100 RTs
                                     if  rt_count > 100 or followers_count > 5000 or verified == True:
                                         #Retweet the tweet!
-                                        but_with_a = format_bang_followup(tweet_text)
-
+                                        if (re.search('(?<=not with a bang).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)) != None:
+                                            but_with_a = format_bang_followup(tweet_text)
+                                        else:
+                                            but_with_a = "but a whimper"
                                         tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
                                         new_tweet = make_italics(f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.')
                                         new_tweet = twitter_bot.update_status(status=new_tweet)
@@ -186,7 +191,7 @@ for page in search_results:
                                 #Check that tweets has more than 100 RTs
                                     if  rt_count > 100:
                                         #Retweet the tweet!
-                                        if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)).group() != None:
+                                        if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)) != None:
                                             the_blank = format_the_blank_followup(tweet_text)
                                         else:
                                             the_blank = "the world ends"
