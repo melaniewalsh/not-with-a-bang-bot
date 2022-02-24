@@ -56,16 +56,20 @@ def mentions_bang(status):
     test_text = ' '.join(status.lower().split())
     test_text = re.sub(r'[^\w\s]','',test_text)
 
-    if 'not with a bang but' in test_text and 'whimper' not in test_text:
+    if 'not with a bang' in test_text and 'whimper' not in test_text:
         return True
     else:
         return False
 
 def format_bang_followup(tweet_text):
+    tweet_text = tweet_text.replace('\n', ' ')
+
     # Capture after "not with a bang" and before a period or hashtag
-    but_with_a = (re.search('(?<=not with a bang).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)).group()
+    if (re.search('(?<=not with a bang).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)) != None:
+        but_with_a = (re.search('(?<=not with a bang).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)).group()
+    else:
+        but_with_a = (re.search('(?<=not with a bang).*', tweet_text, re.IGNORECASE)).group()
     # Replace line breaks with a space
-    but_with_a = but_with_a.replace('\n', ' ')
     but_with_a = re.sub(r'http\S+', '', but_with_a)
     #but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
     but_with_a = re.sub(r'^[,]','',but_with_a)
@@ -130,10 +134,8 @@ for page in search_results:
                                 #Check that tweets has more than 100 RTs
                                     if  rt_count > 100 or followers_count > 5000 or verified == True:
                                         #Retweet the tweet!
-                                        if (re.search('(?<=not with a bang).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)) != None:
-                                            but_with_a = format_bang_followup(tweet_text)
-                                        else:
-                                            but_with_a = "but a whimper"
+                                        but_with_a = format_bang_followup(tweet_text)
+
                                         if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)) != None:
                                             the_blank = format_the_blank_followup(tweet_text)
                                         else:
@@ -163,10 +165,8 @@ for page in search_results:
                                 #Check that tweets has more than 100 RTs
                                     if  rt_count > 100 or followers_count > 5000 or verified == True:
                                         #Retweet the tweet!
-                                        if (re.search('(?<=not with a bang).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)) != None:
-                                            but_with_a = format_bang_followup(tweet_text)
-                                        else:
-                                            but_with_a = "but a whimper"
+                                        but_with_a = format_bang_followup(tweet_text)
+
                                         tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
                                         new_tweet = make_italics(f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.')
                                         new_tweet = twitter_bot.update_status(status=new_tweet)
