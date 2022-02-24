@@ -19,7 +19,7 @@ start_time = datetime.datetime(2009, 1, 1, 0, 0, 0, 0, datetime.timezone.utc)
 
 
 # The search_all method call the full-archive search endpoint to get Tweets based on the query, start and end times
-search_results = client.search_all(query="(\"not with a bang\") OR (\"This is the way\" ends \"not with a bang\")", start_time=start_time, max_results=100)
+search_results = client.search_all(query="(\"not with a bang\") OR (\"This is the way\" \"not with a bang\") OR (\"This is how\" \"not with a bang\")", start_time=start_time, max_results=100)
 
 
 #Tweet counter to make sure that the bot only retweets one tweet every time the script runs
@@ -62,20 +62,26 @@ def mentions_bang(status):
         return False
 
 def format_bang_followup(tweet_text):
-    but_with_a = (re.search('(?<=not with a bang)[\s\S]*', tweet_text, re.IGNORECASE)).group()
-    but_with_a = but_with_a.replace('\n', '').lower()
+    # Capture after "not with a bang" and before a period or hashtag
+    but_with_a = (re.search('(?<=not with a bang).*?(?=\.|#|"|”|\')', tweet_text, re.IGNORECASE)).group()
+    # Replace line breaks with a space
+    but_with_a = but_with_a.replace('\n', ' ')
     but_with_a = re.sub(r'http\S+', '', but_with_a)
-    but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
+    #but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
+    but_with_a = re.sub(r'^[,]','',but_with_a)
+    but_with_a = re.sub(r'[\'"”]$','',but_with_a)
     but_with_a = re.sub(r'^ ', '', but_with_a )
     but_with_a = but_with_a.strip()
-    but_with_a = (but_with_a[:161] + "...") if len(but_with_a) > 164 else but_with_a
+    #but_with_a = (but_with_a[:161] + "...") if len(but_with_a) > 164 else but_with_a
+    but_with_a = (but_with_a[:97] + "...") if len(but_with_a) > 97 else but_with_a
     return but_with_a
 
 def format_the_blank_followup(tweet_text):
-    the_blank = (re.search('(?<=This is the way).*?(?=not with a)', tweet_text, re.IGNORECASE)).group()
-    the_blank = the_blank.replace('\n', '').lower()
+    # Capture after "This is the way" or "This is how" and before "not with a"
+    the_blank = (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)).group()
+    the_blank = the_blank.replace('\n', ' ')
     the_blank = re.sub(r'http\S+', '', the_blank)
-    the_blank = re.sub(r'[\'"”.,]','', the_blank)
+    the_blank = re.sub(r'[\'"”.:,]','', the_blank)
     the_blank = re.sub(r'^ ', '', the_blank)
     return the_blank
 
@@ -96,8 +102,6 @@ def make_italics(input_text):
             output += character
 
     return output
-
-
 
 
 for page in search_results:
@@ -127,15 +131,16 @@ for page in search_results:
                                     if  rt_count > 100 or followers_count > 5000 or verified == True:
                                         #Retweet the tweet!
                                         but_with_a = format_bang_followup(tweet_text)
-                                        if (re.search('(?<=This is the way).*?(?=not with a)', tweet_text, re.IGNORECASE)) != None:
+                                        if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)).group() != None:
                                             the_blank = format_the_blank_followup(tweet_text)
                                         else:
-                                            the_blank = "the world"
+                                            the_blank = "the world ends"
                                         tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
-                                        #new_tweet= make_italics(f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.') + f"\n\n{tweet_url}"
-                                        new_tweet= f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
+                                        new_tweet= make_italics(f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.')
+                                        new_tweet = twitter_bot.update_status(status=new_tweet)
+                                        reply_tweet = twitter_bot.update_status(status=f"\n\n{tweet_url}", in_reply_to_status_id=new_tweet['id'], auto_populate_reply_metadata=True)
+                                        #new_tweet= f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
 
-                                        twitter_bot.update_status(status=new_tweet)
                                         tweet_counter +=1
                                         print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
                                         print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
@@ -149,56 +154,60 @@ for page in search_results:
                                 print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
                                 continue
 
-                        # elif mentions_bang(tweet_text) == True:
-                        #     try:
-                        #         if tweet_counter == 0:
-                        #         #Check that tweets has more than 100 RTs
-                        #             if  rt_count > 100 or followers_count > 5000 or verified == True:
-                        #                 #Retweet the tweet!
-                        #                 but_with_a = format_bang_followup(tweet_text)
-                        #
-                        #                 tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
-                        #                 #new_tweet= make_italics(f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.') + f"\n\n{tweet_url}"
-                        #                 new_tweet= f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
-                        #
-                        #                 twitter_bot.update_status(status=new_tweet)
-                        #                 tweet_counter +=1
-                        #                 print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
-                        #                 print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
-                        #         else:
-                        #             print("Done tweeting")
-                        #             sys.exit(1)
-                        #     except TwythonError as e:
-                        #         print(e)
-                        #         print(f"ERROR! \n Tweet: {new_tweet} {tweet_text} \n Followers: {followers_count} \n URL: {tweet_url} \n RT:{rt_count}")
-                        #         print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
-                        #         continue
-                        # elif mentions_ends(tweet_text) == True:
-                        #     try:
-                        #         if tweet_counter == 0 or followers_count > 5000 or verified == True:
-                        #         #Check that tweets has more than 100 RTs
-                        #             if  rt_count > 100:
-                        #                 #Retweet the tweet!
-                        #                 if (re.search('(?<=This is the way).*?(?=not with a)', tweet_text, re.IGNORECASE)) != None:
-                        #                     the_blank = format_the_blank_followup(tweet_text)
-                        #                 else:
-                        #                     the_blank = "the world"
-                        #
-                        #                 tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
-                        #                 #new_tweet= make_italics(f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.') + f"\n\n{tweet_url}"
-                        #                 new_tweet= f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
-                        #
-                        #                 twitter_bot.update_status(status=new_tweet)
-                        #                 tweet_counter +=1
-                        #                 print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
-                        #         else:
-                        #             print("Done tweeting")
-                        #             sys.exit(1)
-                        #     except TwythonError as e:
-                        #         print(e)
-                        #         print(f"ERROR! \n Tweet: {new_tweet} {tweet_text} \n Followers: {followers_count} \n URL: {tweet_url} \n RT:{rt_count}")
-                        #         print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
-                        #         continue
+                        elif mentions_bang(tweet_text) == True:
+                            try:
+                                if tweet_counter == 0:
+                                #Check that tweets has more than 100 RTs
+                                    if  rt_count > 100 or followers_count > 5000 or verified == True:
+                                        #Retweet the tweet!
+                                        but_with_a = format_bang_followup(tweet_text)
+
+                                        tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
+                                        new_tweet = make_italics(f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.')
+                                        new_tweet = twitter_bot.update_status(status=new_tweet)
+
+                                        #new_tweet= f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
+                                        reply_tweet = twitter_bot.update_status(status=f"\n\n{tweet_url}", in_reply_to_status_id=new_tweet['id'], auto_populate_reply_metadata=True)
+
+                                        tweet_counter +=1
+                                        print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
+                                        print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                else:
+                                    print("Done tweeting")
+                                    sys.exit(1)
+                            except TwythonError as e:
+                                print(e)
+                                print(f"ERROR! \n Tweet: {new_tweet} {tweet_text} \n Followers: {followers_count} \n URL: {tweet_url} \n RT:{rt_count}")
+                                print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
+                                continue
+                        elif mentions_ends(tweet_text) == True:
+                            try:
+                                if tweet_counter == 0 or followers_count > 5000 or verified == True:
+                                #Check that tweets has more than 100 RTs
+                                    if  rt_count > 100:
+                                        #Retweet the tweet!
+                                        if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)).group() != None:
+                                            the_blank = format_the_blank_followup(tweet_text)
+                                        else:
+                                            the_blank = "the world ends"
+
+                                        tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
+                                        new_tweet = make_italics(f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.')
+                                        #new_tweet= f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
+                                        new_tweet = twitter_bot.update_status(status=new_tweet)
+
+                                        reply_tweet = twitter_bot.update_status(status=f"\n\n{tweet_url}", in_reply_to_status_id=new_tweet['id'], auto_populate_reply_metadata=True)
+
+                                        tweet_counter +=1
+                                        print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                else:
+                                    print("Done tweeting")
+                                    sys.exit(1)
+                            except TwythonError as e:
+                                print(e)
+                                print(f"ERROR! \n Tweet: {new_tweet} {tweet_text} \n Followers: {followers_count} \n URL: {tweet_url} \n RT:{rt_count}")
+                                print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
+                                continue
 
 
     # else:
