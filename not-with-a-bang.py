@@ -192,7 +192,7 @@ for page in search_results:
                                             the_blank = "the world ends"
 
                                         tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
-                                        new_tweet = make_italics(f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.')
+                                        new_tweet = make_italics(f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang but a whimper.')
                                         #new_tweet= f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
                                         new_tweet = twitter_bot.update_status(status=new_tweet)
 
