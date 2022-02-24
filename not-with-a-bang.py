@@ -63,7 +63,7 @@ def mentions_bang(status):
 
 def format_bang_followup(tweet_text):
     # Capture after "not with a bang" and before a period or hashtag
-    but_with_a = (re.search('(?<=not with a bang).*?(?=\.|#|"|”|\')', tweet_text, re.IGNORECASE)).group()
+    but_with_a = (re.search('(?<=not with a bang).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)).group()
     # Replace line breaks with a space
     but_with_a = but_with_a.replace('\n', ' ')
     but_with_a = re.sub(r'http\S+', '', but_with_a)
