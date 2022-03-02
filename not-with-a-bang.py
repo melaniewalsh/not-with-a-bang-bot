@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from twython import Twython, TwythonError
 from secrets import *
 import regex as re
@@ -5,6 +7,10 @@ from twarc import Twarc2, expansions
 import datetime
 import json
 import sys
+
+from inspect import currentframe, getframeinfo
+
+
 #Initialize Twitter bot
 twitter_bot = Twython(app_key, app_secret, oauth_token, oauth_token_secret)
 
@@ -56,28 +62,30 @@ def mentions_bang(status):
     test_text = ' '.join(status.lower().split())
     test_text = re.sub(r'[^\w\s]','',test_text)
 
-    if 'bang' in test_text and 'comb over' not in test_text:
+    if 'bang' in test_text and 'comb over' not in test_text and 'whimper' not in test_text:
         return True
     else:
         return False
 
 def format_bang_followup(tweet_text):
     tweet_text = tweet_text.replace('\n', ' ')
-
     # Capture after "not with a bang" and before a period or hashtag
-    if (re.search('(?<=not with).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)) != None:
-        but_with_a = (re.search('(?<=not with).*?(?=\.|#|"|”)', tweet_text, re.IGNORECASE)).group()
+    if (re.search('(?<=not with a bang).*?(?=\.\s|#|"|”)', tweet_text, re.IGNORECASE)) != None:
+        but_with_a = (re.search('(?<=not with a bang).*?(?=\.\s|#|"|”)', tweet_text, re.IGNORECASE)).group()
+    elif (re.search('(?<=not with a bang).*', tweet_text, re.IGNORECASE)) != None:
+        but_with_a = (re.search('(?<=not with a bang).*', tweet_text, re.IGNORECASE)).group()
     else:
-        but_with_a = (re.search('(?<=not with).*', tweet_text, re.IGNORECASE)).group()
+        but_with_a = "but a whimper"
     # Replace line breaks with a space
     but_with_a = re.sub(r'http\S+', '', but_with_a)
     #but_with_a = re.sub(r'[\'"”.,]','',but_with_a)
     but_with_a = re.sub(r'^[,]','',but_with_a)
-    but_with_a = re.sub(r'[\'"”]$','',but_with_a)
+    but_with_a = re.sub(r'[\'"”.!:;?]$','',but_with_a)
     but_with_a = re.sub(r'^ ', '', but_with_a )
-    but_with_a = but_with_a.strip()
+    # Strip duplicate white space
+    but_with_a =  re.sub(' +', ' ', but_with_a)
     #but_with_a = (but_with_a[:161] + "...") if len(but_with_a) > 164 else but_with_a
-    but_with_a = (but_with_a[:161] + "...") if len(but_with_a) > 97 else but_with_a
+    but_with_a = (but_with_a[:161] + "...") if len(but_with_a) > 164 else but_with_a
     but_with_a = but_with_a.strip()
     return but_with_a
 
@@ -151,7 +159,9 @@ for page in recent_search_results:
                                         tweet_counter +=1
                                         print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
                                         print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
-                                    elif followers_count > 5000 or verified == True:
+                                        frameinfo = getframeinfo(currentframe())
+                                        print(frameinfo.filename, frameinfo.lineno)
+
                                         but_with_a = format_bang_followup(tweet_text)
 
                                         if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)) != None:
@@ -167,7 +177,8 @@ for page in recent_search_results:
                                         tweet_counter +=1
                                         print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
                                         print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
-
+                                        frameinfo = getframeinfo(currentframe())
+                                        print(frameinfo.filename, frameinfo.lineno)
                                 else:
                                     print("Done tweeting")
                                     sys.exit(1)
@@ -186,7 +197,7 @@ for page in recent_search_results:
                                         but_with_a = format_bang_followup(tweet_text)
 
                                         tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
-                                        new_tweet = f'This is the way the world ends\nThis is the way the world ends\nNot with {but_with_a}.'
+                                        new_tweet = f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.'
                                         new_tweet = twitter_bot.update_status(status=new_tweet)
 
                                         #new_tweet= f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
@@ -195,12 +206,14 @@ for page in recent_search_results:
                                         tweet_counter +=1
                                         print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
                                         print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                        frameinfo = getframeinfo(currentframe())
+                                        print(frameinfo.filename, frameinfo.lineno)
                                     elif followers_count > 5000 or verified == True:
                                             #Retweet the tweet!
                                             but_with_a = format_bang_followup(tweet_text)
 
                                             tweet_url = f'https://twitter.com/{user}/status/{retweet_id}'
-                                            new_tweet = f'This is the way the world ends\nThis is the way the world ends\nNot with {but_with_a}.'
+                                            new_tweet = f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.'
                                             new_tweet = twitter_bot.update_status(status=new_tweet)
 
                                             #new_tweet= f'This is the way the world ends\nThis is the way the world ends\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
@@ -209,6 +222,8 @@ for page in recent_search_results:
                                             tweet_counter +=1
                                             print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
                                             print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                            frameinfo = getframeinfo(currentframe())
+                                            print(frameinfo.filename, frameinfo.lineno)
 
                                 else:
                                     print("Done tweeting")
@@ -238,6 +253,8 @@ for page in recent_search_results:
 
                                         tweet_counter +=1
                                         print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                        frameinfo = getframeinfo(currentframe())
+                                        print(frameinfo.filename, frameinfo.lineno)
                                     elif followers_count > 5000 or verified == True:
                                             #Retweet the tweet!
                                             if (re.search('(?<=This is the way|<=This is how).*?(?=not with a|\n*not with a|.not with a)', tweet_text, re.IGNORECASE)) != None:
@@ -254,6 +271,8 @@ for page in recent_search_results:
 
                                             tweet_counter +=1
                                             print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                            frameinfo = getframeinfo(currentframe())
+                                            print(frameinfo.filename, frameinfo.lineno)
                                 else:
                                     print("Done tweeting")
                                     sys.exit(1)
@@ -304,8 +323,10 @@ for page in search_results:
                                         #new_tweet= f'This is the way {the_blank}\nThis is the way {the_blank}\nNot with a bang {but_with_a}.' + f"\n\n{tweet_url}"
 
                                         tweet_counter +=1
-                                        print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
+                                        print(f"Supposed retweet All Search Results \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
                                         print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                        frameinfo = getframeinfo(currentframe())
+                                        print(frameinfo.filename, frameinfo.lineno)
 
                                 else:
                                     print("Done tweeting")
@@ -334,6 +355,8 @@ for page in search_results:
                                         tweet_counter +=1
                                         print(f"Supposed retweet \n Retweet user: {user} \n Tweet user : {indy_user} \n Retweet id: {retweet_id} \n Tweet id: {tweet_id}")
                                         print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                        frameinfo = getframeinfo(currentframe())
+                                        print(frameinfo.filename, frameinfo.lineno)
                                 else:
                                     print("Done tweeting")
                                     sys.exit(1)
@@ -362,6 +385,8 @@ for page in search_results:
 
                                         tweet_counter +=1
                                         print(f"✨Met RT threshold✨ Succesfully retweeted {tweet_text}!")
+                                        frameinfo = getframeinfo(currentframe())
+                                        print(frameinfo.filename, frameinfo.lineno)
                                 else:
                                     print("Done tweeting")
                                     sys.exit(1)
